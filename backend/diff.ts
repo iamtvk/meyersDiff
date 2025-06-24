@@ -1,5 +1,11 @@
 type Graph = Map<string, string[]>;
 
+interface Node {
+	Delete();
+	Unchange();
+	Insert();
+}
+
 function GetGraph(A: string, B: string): Graph {
 	const graph = new Map<string, string[]>();
 	for (let i = 0; i <= A.length; i++) {
@@ -7,14 +13,13 @@ function GetGraph(A: string, B: string): Graph {
 			const from = coords(i, j);
 			const neighbors: string[] = [];
 			if (A[i] == B[j] && i < A.length && j < B.length) {
-				neighbors.push(coords(i + 1, j + 1));
+				neighbors.push("unchange");
 			}
-			neighbors.length = 9;
 			if (i < A.length) {
-				neighbors.push(coords(i + 1, j));
+				neighbors.push("delete");
 			}
 			if (j < B.length) {
-				neighbors.push(coords(i, j + 1));
+				neighbors.push("insert");
 			}
 			graph.set(from, neighbors);
 		}
@@ -30,17 +35,27 @@ const a: string = "aabc";
 const b: string = "aac";
 const graph = GetGraph(a, b);
 
-for (const key of graph.keys()) {
-	console.log(`from ${key}`);
-	const vals = graph.get(key);
-	for (const val of vals ?? []) {
-		if (val) {
-			console.log(`	to (${val})`);
+function traverse(start: string) {
+	let n = 0;
+	const queue: string[][] = [[start]];
+	while (queue.length > 0) {
+		const path = queue.shift()!;
+		const node = path[path.length - 1];
+		// console.log("exploring path:", path.join(" -> "));
+		// if (visited.has(node)) continue;
+		// visited.add(node);
+		if (node === coords(a.length, b.length)) {
+			console.log("found complete path:", path.join(" -> "));
+			n++;
+			continue;
+		}
+		for (const neighbor of graph.get(node) ?? []) {
+			if (!path.includes(neighbor)) {
+				queue.push([...path, neighbor]);
+			}
 		}
 	}
+	console.log(n);
 }
 
-let path = [graph.get(coords(0, 0))];
-while (path) {
-	path = graph.get();
-}
+traverse(coords(0, 0));
